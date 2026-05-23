@@ -37,24 +37,49 @@
 
 #     return qa
 from langchain_community.llms import Ollama
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+
+llm = Ollama(model="gemma:2b")
 
 
 def summarize_text(text):
 
-    llm = Ollama(model="llama3")
+    splitter = RecursiveCharacterTextSplitter(
+        chunk_size=3000,
+        chunk_overlap=200
+    )
 
-    prompt = f"""
-    Summarize the following YouTube video transcript.
+    chunks = splitter.split_text(text)
 
-    Transcript:
-    {text}
+    chunk_summaries = []
 
-    Provide:
-    1. Short Summary
+    for chunk in chunks:
+
+        prompt = f"""
+        Summarize this part of a YouTube video transcript:
+
+        {chunk}
+
+        Give concise bullet points.
+        """
+
+        response = llm.invoke(prompt)
+
+        chunk_summaries.append(response)
+
+    combined_summary = "\n".join(chunk_summaries)
+
+    final_prompt = f"""
+    Combine these summaries into:
+
+    1. Overall Summary
     2. Key Points
     3. Important Insights
+
+    Summaries:
+    {combined_summary}
     """
 
-    response = llm.invoke(prompt)
+    final_response = llm.invoke(final_prompt)
 
-    return response
+    return final_response

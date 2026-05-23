@@ -1,16 +1,28 @@
 import yt_dlp
 import os
 import uuid
+import streamlit as st
 
 from faster_whisper import WhisperModel
 
 TEMP_FOLDER = "temp"
 
-model = WhisperModel(
-    "tiny",
-    device="cpu",
-    compute_type="int8"
-)
+@st.cache_resource
+def load_model():
+
+    return WhisperModel(
+        "tiny",
+        device="cpu",
+        compute_type="int8"
+    )
+
+
+model = load_model()
+# model = WhisperModel(
+#     "tiny",
+#     device="cpu",
+#     compute_type="int8"
+# )
 
 
 def download_audio(youtube_url):
@@ -26,7 +38,7 @@ def download_audio(youtube_url):
     )
 
     ydl_opts = {
-        'format': 'worstaudio',
+        'format': 'bestaudio[filesize<20M]/bestaudio',
         'outtmpl': output_path,
         'quiet': True
     }
@@ -43,8 +55,11 @@ def download_audio(youtube_url):
 
 def transcribe_audio(audio_path):
 
-    segments, info = model.transcribe(audio_path)
-
+    segments, info = model.transcribe(
+        audio_path,
+        beam_size=1,
+        vad_filter=True
+    )
     transcript = ""
 
     for segment in segments:
