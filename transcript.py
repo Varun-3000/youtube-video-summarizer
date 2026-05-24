@@ -11,7 +11,7 @@ TEMP_FOLDER = "temp"
 def load_model():
 
     return WhisperModel(
-        "tiny",
+        "tiny.en",
         device="cpu",
         compute_type="int8"
     )
@@ -38,7 +38,7 @@ def download_audio(youtube_url):
     )
 
     ydl_opts = {
-        'format': 'worstaudio',
+        'format': 'bestaudio[filesize<10M]/worstaudio',
         'outtmpl': output_path,
         'quiet': True
     }

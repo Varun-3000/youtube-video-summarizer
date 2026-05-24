@@ -1,85 +1,31 @@
-# from langchain.text_splitter import RecursiveCharacterTextSplitter
-# from langchain_ollama import ChatOllama, OllamaEmbeddings
-# from langchain_community.vectorstores import Chroma
-# from langchain.chains import RetrievalQA
-
-
-# def build_qa_chain(text):
-
-#     # 1. Split transcript
-#     splitter = RecursiveCharacterTextSplitter(
-#         chunk_size=1000,
-#         chunk_overlap=200
-#     )
-
-#     docs = splitter.create_documents([text])
-
-#     # 2. Embeddings
-#     embeddings = OllamaEmbeddings(model="nomic-embed-text")
-
-#     # 3. Vector DB
-#     db = Chroma.from_documents(
-#         docs,
-#         embedding=embeddings,
-#         persist_directory="chroma_db"
-#     )
-
-#     retriever = db.as_retriever()
-
-#     # 4. LLM
-#     llm = ChatOllama(model="llama3")
-
-#     # 5. QA chain
-#     qa = RetrievalQA.from_chain_type(
-#         llm=llm,
-#         retriever=retriever
-#     )
-
-#     return qa
 from langchain_community.llms import Ollama
-from langchain.text_splitter import RecursiveCharacterTextSplitter
 
-llm = Ollama( model="phi3:latest",temperature=0)
+llm = Ollama(
+    model="phi3:latest",
+    temperature=0
+)
 
 
 def summarize_text(text):
 
-    splitter = RecursiveCharacterTextSplitter(
-        chunk_size=6000,
-        chunk_overlap=100
-    )
+    # Limit transcript size
+    text = text[:12000]
 
-    chunks = splitter.split_text(text)
+    prompt = f"""
+    Summarize this YouTube video transcript.
 
-    chunk_summaries = []
-
-    for chunk in chunks:
-
-        prompt = f"""
-        Summarize this part of a YouTube video transcript:
-
-        {chunk}
-
-        Give concise bullet points.
-        """
-
-        response = llm.invoke(prompt)
-
-        chunk_summaries.append(response)
-
-    combined_summary = "\n".join(chunk_summaries)
-
-    final_prompt = f"""
-    Combine these summaries into:
+    Provide:
 
     1. Overall Summary
     2. Key Points
     3. Important Insights
 
-    Summaries:
-    {combined_summary}
+    Keep the response concise and structured.
+
+    Transcript:
+    {text}
     """
 
-    final_response = llm.invoke(final_prompt)
+    response = llm.invoke(prompt)
 
-    return final_response
+    return response
