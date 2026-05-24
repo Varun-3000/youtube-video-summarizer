@@ -39,14 +39,14 @@
 from langchain_community.llms import Ollama
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
-llm = Ollama(model="gemma:2b")
+llm = Ollama( model="phi3:latest",temperature=0)
 
 
 def summarize_text(text):
 
     splitter = RecursiveCharacterTextSplitter(
-        chunk_size=3000,
-        chunk_overlap=200
+        chunk_size=6000,
+        chunk_overlap=100
     )
 
     chunks = splitter.split_text(text)

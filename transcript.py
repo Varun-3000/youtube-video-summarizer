@@ -38,7 +38,7 @@ def download_audio(youtube_url):
     )
 
     ydl_opts = {
-        'format': 'bestaudio[filesize<20M]/bestaudio',
+        'format': 'worstaudio',
         'outtmpl': output_path,
         'quiet': True
     }
@@ -58,12 +58,16 @@ def transcribe_audio(audio_path):
     segments, info = model.transcribe(
         audio_path,
         beam_size=1,
-        vad_filter=True
+        vad_filter=True,
+        condition_on_previous_text=False
     )
     transcript = ""
 
-    for segment in segments:
-        transcript += segment.text + " "
+    # for segment in segments:
+    #     transcript += segment.text + " "
+
+    #String concatenation in loops is slower.
+    transcript = " ".join([segment.text for segment in segments])
 
     if os.path.exists(audio_path):
         os.remove(audio_path)
